@@ -2,7 +2,6 @@
 
 const loader = document.getElementById('loader');
 const toast = document.getElementById('toast');
-const startTime = performance.now();
 let toastTimer;
 
 function showToast(message) {
@@ -20,20 +19,54 @@ function finishLoading() {
   document.body.classList.remove('loading');
 }
 
-function finishAfterMinimum() {
-  const remaining = Math.max(0, 1800 - (performance.now() - startTime));
-  window.setTimeout(finishLoading, remaining);
+const sleep = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
+async function typeIntroduction(element, value, delayMs) {
+  if (!element) return;
+  element.textContent = '';
+  for (const char of value) {
+    element.textContent += char;
+    await sleep(char === ' ' ? delayMs * .55 : delayMs);
+  }
 }
 
+async function runIntroduction() {
+  const roleText = document.getElementById('introRoleText');
+  const nameText = document.getElementById('introNameText');
+  if (!loader || !roleText || !nameText) {
+    finishLoading();
+    return;
+  }
+
+  // Respect accessibility preferences: avoid lengthy animated typing.
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    roleText.textContent = 'Managing Director';
+    nameText.textContent = 'Namanya Obed Collins';
+    loader.classList.add('is-typing-name', 'is-complete');
+    await sleep(320);
+    finishLoading();
+    return;
+  }
+
+  // Title first, then his full name, with a brief elegant final hold.
+  await sleep(240);
+  await typeIntroduction(roleText, 'Managing Director', 57);
+  await sleep(270);
+  loader.classList.add('is-typing-name');
+  await typeIntroduction(nameText, 'Namanya Obed Collins', 66);
+  loader.classList.add('is-complete');
+  await sleep(720);
+  finishLoading();
+}
+runIntroduction().catch(finishLoading);
+// Safety cap: never trap visitors on the splash screen.
+window.setTimeout(finishLoading, 5000);
+
+// Bring the portrait into the browser cache in parallel with the introduction.
 const portrait = document.querySelector('.portrait');
 if (portrait && !portrait.complete) {
-  portrait.addEventListener('load', finishAfterMinimum, { once: true });
-  portrait.addEventListener('error', finishAfterMinimum, { once: true });
-} else {
-  finishAfterMinimum();
+  portrait.loading = 'eager';
 }
-// Never leave the profile hidden if an image request stalls.
-window.setTimeout(finishLoading, 2800);
 
 const contactLines = [
   'BEGIN:VCARD',
