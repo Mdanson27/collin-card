@@ -297,10 +297,10 @@
   width:19px!important;height:19px!important;
   flex:0 0 19px;
   margin:0;
-  color:var(--qb-blue)!important;
-  animation:none!important;
-  transform:none!important;
-  filter:none!important;
+  color:#8b751f;
+  animation:bulbFlash 2.4s ease-in-out infinite;
+  transform:scale(1);
+  filter:none;
 }
 .profile-footer .signature-copy{
   display:inline-flex!important;
@@ -309,9 +309,9 @@
   gap:6px!important;
   line-height:1.35!important;
   margin:0;
-  animation:none!important;
-  opacity:1!important;
-  filter:none!important;
+  animation:wordGlow 2.4s ease-in-out infinite;
+  opacity:1;
+  filter:none;
   white-space:nowrap;
 }
 .profile-footer .signature-copy small{
@@ -357,4 +357,16 @@
 @media(max-width:380px){
   .profile-footer-inner{width:calc(100% - 20px)!important}
   .profile-footer .signature-copy strong{font-size:.62rem!important}
+}
+
+/* Keep the original AutoMinds blinking-bulb and glowing-wordmark effect,
+   even after moving the signature to the left side of the footer. */
+@media (prefers-reduced-motion:reduce){
+  .profile-footer .signature-bulb,
+  .profile-footer .signature-copy{
+    animation:none!important;
+    opacity:1!important;
+    transform:none!important;
+    filter:none!important;
+  }
 }
